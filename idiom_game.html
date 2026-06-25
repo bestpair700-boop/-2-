@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사자성어 마스터 게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #4a4a8a;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 20px;
+            height: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+        .progress-text {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        .question-type {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .question-box {
+            background: #f8f9ff;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 2px solid #e8e8ff;
+        }
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .highlight {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.4em;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .option-btn {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 18px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+        .option-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+        .option-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        .option-btn.correct {
+            border-color: #4caf50;
+            background: #4caf50;
+            color: white;
+        }
+        .option-btn.wrong {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+        .ox-options {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        .ox-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 4px solid;
+        }
+        .ox-btn.o {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            color: #2196f3;
+        }
+        .ox-btn.x {
+            background: #ffebee;
+            border-color: #f44336;
+            color: #f44336;
+        }
+        .ox-btn:hover {
+            transform: scale(1.1);
+        }
+        .ox-btn.selected.o, .ox-btn.correct.o {
+            background: #2196f3;
+            color: white;
+        }
+        .ox-btn.selected.x, .ox-btn.wrong.x {
+            background: #f44336;
+            color: white;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .text-input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .text-input:focus {
+            border-color: #667eea;
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .feedback {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .feedback.correct {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            color: #2e7d32;
+        }
+        .feedback.wrong {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            color: #c62828;
+        }
+        .feedback h3 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .feedback p {
+            line-height: 1.6;
+        }
+        .next-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 18px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: none;
+        }
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .result-screen {
+            text-align: center;
+        }
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 30px auto;
+            color: white;
+        }
+        .score-number {
+            font-size: 3.5em;
+            font-weight: bold;
+        }
+        .score-label {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .result-message {
+            font-size: 1.5em;
+            color: #4a4a8a;
+            margin-bottom: 20px;
+        }
+        .wrong-list {
+            background: #fff5f5;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .wrong-list h3 {
+            color: #c62828;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .wrong-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #f44336;
+        }
+        .wrong-item:last-child {
+            margin-bottom: 0;
+        }
+        .wrong-item strong {
+            color: #667eea;
+        }
+        .restart-btn {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 18px 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+        }
+        .start-screen {
+            text-align: center;
+        }
+        .start-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        .start-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 20px 60px;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin-top: 30px;
+        }
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        .idiom-list {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .idiom-list h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .idiom-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            font-size: 0.95em;
+        }
+        .idiom-item {
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            color: #555;
+        }
+        .hint-text {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 10px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 25px; }
+            h1 { font-size: 1.7em; }
+            .options { grid-template-columns: 1fr; }
+            .idiom-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="startScreen" class="start-screen">
+            <div class="start-icon">📚</div>
+            <h1>사자성어 마스터</h1>
+            <p class="subtitle">15개의 사자성어를 재미있게 익혀보세요!</p>
+            <div class="idiom-list">
+                <h4>🎯 학습할 사자성어</h4>
+                <div class="idiom-grid">
+                    <div class="idiom-item">대기만성</div>
+                    <div class="idiom-item">우공이산</div>
+                    <div class="idiom-item">인지상정</div>
+                    <div class="idiom-item">산전수전</div>
+                    <div class="idiom-item">오비이락</div>
+                    <div class="idiom-item">우후죽순</div>
+                    <div class="idiom-item">일사천리</div>
+                    <div class="idiom-item">전광석화</div>
+                    <div class="idiom-item">절차탁마</div>
+                    <div class="idiom-item">점입가경</div>
+                    <div class="idiom-item">주경야독</div>
+                    <div class="idiom-item">진퇴양난</div>
+                    <div class="idiom-item">차일피일</div>
+                    <div class="idiom-item">천신만고</div>
+                    <div class="idiom-item">천차만별</div>
+                </div>
+            </div>
+            <button class="start-btn" onclick="startGame()">🎮 게임 시작하기</button>
+        </div>
+
+        <div id="gameScreen" style="display: none;">
+            <h1>사자성어 마스터</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">문제 1 / 10</div>
+
+            <span class="question-type" id="questionType">객관식</span>
+
+            <div class="question-box">
+                <p class="question-text" id="questionText"></p>
+            </div>
+
+            <div id="optionsArea"></div>
+
+            <div class="feedback" id="feedback">
+                <h3 id="feedbackTitle"></h3>
+                <p id="feedbackText"></p>
+            </div>
+
+            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">다음 문제 →</button>
+        </div>
+
+        <div id="resultScreen" class="result-screen" style="display: none;">
+            <h1>🎉 게임 완료!</h1>
+            <div class="score-circle">
+                <div class="score-number" id="finalScore">0</div>
+                <div class="score-label">/ 10</div>
+            </div>
+            <p class="result-message" id="resultMessage"></p>
+            <div class="wrong-list" id="wrongList" style="display: none;">
+                <h3>📝 틀린 문제 복습</h3>
+                <div id="wrongItems"></div>
+            </div>
+            <button class="restart-btn" onclick="restartGame()">🔄 다시 도전하기</button>
+        </div>
+    </div>
+
+    <script>
+        const idioms = [
+            { word: "대기만성", meaning: "큰 그릇은 늦게 이루어진다는 뜻으로, 크게 될 사람은 늦게 성공함", hanja: "大器晩成" },
+            { word: "우공이산", meaning: "우공이 산을 옮긴다는 뜻으로, 꾸준한 노력으로 큰 일을 이룸", hanja: "愚公移山" },
+            { word: "인지상정", meaning: "사람이라면 누구나 가지는 보통의 마음이나 감정", hanja: "人之常情" },
+            { word: "산전수전", meaning: "산에서의 싸움과 물에서의 싸움이라는 뜻으로, 세상의 온갖 고생과 어려움을 다 겪음", hanja: "山戰水戰" },
+            { word: "오비이락", meaning: "까마귀 날자 배 떨어진다는 뜻으로, 우연히 한 일이 다른 일과 때가 같아 억울하게 의심을 받음", hanja: "烏飛梨落" },
+            { word: "우후죽순", meaning: "비 온 뒤에 죽순이 솟아나듯, 어떤 일이 한꺼번에 많이 생겨남", hanja: "雨後竹筍" },
+            { word: "일사천리", meaning: "한 번 실을 풀면 천 리를 간다는 뜻으로, 일이 거침없이 빠르게 진행됨", hanja: "一瀉千里" },
+            { word: "전광석화", meaning: "번개 빛과 부싯돌 불이라는 뜻으로, 매우 짧은 시간이나 재빠른 동작을 이르는 말", hanja: "電光石火" },
+            { word: "절차탁마", meaning: "옥이나 돌을 자르고 갈고 쪼고 닦는다는 뜻으로, 학문과 인격을 갈고 닦음", hanja: "切磋琢磨" },
+            { word: "점입가경", meaning: "점점 더 재미있는 경지로 들어간다는 뜻으로, 갈수록 상황이 더 흥미롭거나 (반어적으로) 어처구니없어짐", hanja: "漸入佳境" },
+            { word: "주경야독", meaning: "낮에는 농사짓고 밤에는 글을 읽는다는 뜻으로, 어려운 여건 속에서도 열심히 공부함", hanja: "晝耕夜讀" },
+            { word: "진퇴양난", meaning: "앞으로 나아가기도 뒤로 물러나기도 어려운 곤란한 상황", hanja: "進退兩難" },
+            { word: "차일피일", meaning: "이날 저날 하며 자꾸 기한을 미룸", hanja: "此日彼日" },
+            { word: "천신만고", meaning: "천 가지 매운 것과 만 가지 쓴 것이라는 뜻으로, 온갖 어려운 고비를 겪으며 몹시 고생함", hanja: "千辛萬苦" },
+            { word: "천차만별", meaning: "천 가지 차이와 만 가지 구별이라는 뜻으로, 여러 가지가 모두 차이가 있고 구별됨", hanja: "千差萬別" }
+        ];
+
+        let questions = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let wrongAnswers = [];
+        let answered = false;
+
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function generateQuestions() {
+            questions = [];
+            const shuffledIdioms = shuffle(idioms);
+            const selected = shuffledIdioms.slice(0, 10);
+
+            selected.forEach((idiom, index) => {
+                const type = index % 4;
+                let question;
+
+                if (type === 0) {
+                    const others = shuffle(idioms.filter(i => i.word !== idiom.word)).slice(0, 3);
+                    const options = shuffle([idiom, ...others]);
+                    question = {
+                        type: "meaning-to-word",
+                        typeName: "뜻 → 사자성어",
+                        question: `다음 뜻에 해당하는 사자성어는?`,
+                        highlight: idiom.meaning,
+                        options: options.map(o => o.word),
+                        answer: idiom.word,
+                        idiom: idiom
+                    };
+                } else if (type === 1) {
+                    const others = shuffle(idioms.filter(i => i.word !== idiom.word)).slice(0, 3);
+                    const options = shuffle([idiom, ...others]);
+                    question = {
+                        type: "word-to-meaning",
+                        typeName: "사자성어 → 뜻",
+                        question: `다음 사자성어의 뜻은?`,
+                        highlight: idiom.word,
+                        options: options.map(o => o.meaning.length > 30 ? o.meaning.substring(0, 30) + "..." : o.meaning),
+                        fullOptions: options.map(o => o.meaning),
+                        answer: idiom.meaning.length > 30 ? idiom.meaning.substring(0, 30) + "..." : idiom.meaning,
+                        fullAnswer: idiom.meaning,
+                        idiom: idiom
+                    };
+                } else if (type === 2) {
+                    const isCorrect = Math.random() > 0.5;
+                    let displayMeaning, actualCorrect;
+
+                    if (isCorrect) {
+                        displayMeaning = idiom.meaning;
+                        actualCorrect = true;
+                    } else {
+                        const wrongIdiom = shuffle(idioms.filter(i => i.word !== idiom.word))[0];
+                        displayMeaning = wrongIdiom.meaning;
+                        actualCorrect = false;
+                    }
+
+                    question = {
+                        type: "ox",
+                        typeName: "O X 퀴즈",
+                        question: `'${idiom.word}'의 뜻이 맞으면 O, 틀리면 X`,
+                        highlight: displayMeaning,
+                        answer: actualCorrect,
+                        idiom: idiom
+                    };
+                } else {
+                    question = {
+                        type: "typing",
+                        typeName: "주관식",
+                        question: `다음 뜻에 해당하는 사자성어를 쓰세요.`,
+                        highlight: idiom.meaning,
+                        answer: idiom.word,
+                        idiom: idiom
+                    };
+                }
+
+                questions.push(question);
+            });
+
+            questions = shuffle(questions);
+        }
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('resultScreen').style.display = 'none';
+
+            generateQuestions();
+            currentQuestion = 0;
+            score = 0;
+            wrongAnswers = [];
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            answered = false;
+            const q = questions[currentQuestion];
+
+            document.getElementById('progressFill').style.width = ((currentQuestion) / questions.length * 100) + '%';
+            document.getElementById('progressText').textContent = `문제 ${currentQuestion + 1} / ${questions.length}`;
+            document.getElementById('questionType').textContent = q.typeName;
+
+            let questionHTML = q.question;
+            if (q.highlight) {
+                questionHTML += `<br><br><span class="highlight">"${q.highlight}"</span>`;
+            }
+            document.getElementById('questionText').innerHTML = questionHTML;
+
+            const optionsArea = document.getElementById('optionsArea');
+            optionsArea.innerHTML = '';
+
+            if (q.type === "meaning-to-word" || q.type === "word-to-meaning") {
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = opt;
+                    btn.onclick = () => selectOption(btn, opt);
+                    optionsDiv.appendChild(btn);
+                });
+                optionsArea.appendChild(optionsDiv);
+
+                const submitBtn = document.createElement('button');
+                submitBtn.className = 'submit-btn';
+                submitBtn.id = 'submitBtn';
+                submitBtn.textContent = '정답 확인';
+                submitBtn.disabled = true;
+                submitBtn.onclick = checkAnswer;
+                optionsArea.appendChild(submitBtn);
+            } else if (q.type === "ox") {
+                const oxDiv = document.createElement('div');
+                oxDiv.className = 'ox-options';
+
+                const oBtn = document.createElement('button');
+                oBtn.className = 'ox-btn o';
+                oBtn.textContent = 'O';
+                oBtn.onclick = () => selectOX(oBtn, true);
+
+                const xBtn = document.createElement('button');
+                xBtn.className = 'ox-btn x';
+                xBtn.textContent = 'X';
+                xBtn.onclick = () => selectOX(xBtn, false);
+
+                oxDiv.appendChild(oBtn);
+                oxDiv.appendChild(xBtn);
+                optionsArea.appendChild(oxDiv);
+
+                const submitBtn = document.createElement('button');
+                submitBtn.className = 'submit-btn';
+                submitBtn.id = 'submitBtn';
+                submitBtn.textContent = '정답 확인';
+                submitBtn.disabled = true;
+                submitBtn.onclick = checkAnswer;
+                optionsArea.appendChild(submitBtn);
+            } else if (q.type === "typing") {
+                const inputDiv = document.createElement('div');
+                inputDiv.className = 'input-area';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'text-input';
+                input.id = 'typingInput';
+                input.placeholder = '사자성어 4글자를 입력하세요';
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') checkAnswer();
+                });
+                input.addEventListener('input', () => {
+                    document.getElementById('submitBtn').disabled = input.value.trim().length === 0;
+                });
+
+                const submitBtn = document.createElement('button');
+                submitBtn.className = 'submit-btn';
+                submitBtn.id = 'submitBtn';
+                submitBtn.textContent = '확인';
+                submitBtn.disabled = true;
+                submitBtn.onclick = checkAnswer;
+
+                inputDiv.appendChild(input);
+                inputDiv.appendChild(submitBtn);
+                optionsArea.appendChild(inputDiv);
+
+                const hint = document.createElement('p');
+                hint.className = 'hint-text';
+                hint.textContent = '💡 띄어쓰기 없이 입력하세요';
+                optionsArea.appendChild(hint);
+
+                input.focus();
+            }
+
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        let selectedAnswer = null;
+
+        function selectOption(btn, value) {
+            if (answered) return;
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedAnswer = value;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function selectOX(btn, value) {
+            if (answered) return;
+            document.querySelectorAll('.ox-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedAnswer = value;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+            answered = true;
+
+            const q = questions[currentQuestion];
+            let userAnswer;
+            let isCorrect;
+
+            if (q.type === "typing") {
+                userAnswer = document.getElementById('typingInput').value.trim().replace(/\s/g, '');
+                isCorrect = userAnswer === q.answer;
+                document.getElementById('typingInput').disabled = true;
+            } else if (q.type === "ox") {
+                userAnswer = selectedAnswer;
+                isCorrect = userAnswer === q.answer;
+
+                document.querySelectorAll('.ox-btn').forEach(btn => {
+                    if (btn.textContent === 'O' && q.answer === true) {
+                        btn.classList.add('correct');
+                    } else if (btn.textContent === 'X' && q.answer === false) {
+                        btn.classList.add('correct');
+                    }
+                    if (btn.classList.contains('selected') && !isCorrect) {
+                        btn.classList.add('wrong');
+                    }
+                });
+            } else {
+                userAnswer = selectedAnswer;
+                isCorrect = userAnswer === q.answer;
+
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    if (btn.textContent === q.answer) {
+                        btn.classList.add('correct');
+                    }
+                    if (btn.classList.contains('selected') && !isCorrect) {
+                        btn.classList.add('wrong');
+                    }
+                });
+            }
+
+            const feedback = document.getElementById('feedback');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackText = document.getElementById('feedbackText');
+
+            if (isCorrect) {
+                score++;
+                feedback.className = 'feedback correct';
+                feedbackTitle.textContent = '🎉 정답입니다!';
+                feedbackText.innerHTML = `<strong>${q.idiom.word} (${q.idiom.hanja})</strong><br>${q.idiom.meaning}`;
+            } else {
+                feedback.className = 'feedback wrong';
+                feedbackTitle.textContent = '❌ 틀렸습니다';
+
+                let correctAnswerText = '';
+                if (q.type === "ox") {
+                    correctAnswerText = q.answer ? 'O (맞는 설명)' : 'X (틀린 설명)';
+                } else if (q.type === "word-to-meaning") {
+                    correctAnswerText = q.fullAnswer || q.answer;
+                } else {
+                    correctAnswerText = q.answer;
+                }
+
+                feedbackText.innerHTML = `정답: <strong>${correctAnswerText}</strong><br><br><strong>${q.idiom.word} (${q.idiom.hanja})</strong><br>${q.idiom.meaning}`;
+
+                wrongAnswers.push({
+                    word: q.idiom.word,
+                    hanja: q.idiom.hanja,
+                    meaning: q.idiom.meaning,
+                    userAnswer: q.type === "ox" ? (userAnswer ? 'O' : 'X') : userAnswer
+                });
+            }
+
+            feedback.style.display = 'block';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'block';
+            document.getElementById('nextBtn').textContent = currentQuestion < questions.length - 1 ? '다음 문제 →' : '결과 보기 →';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            selectedAnswer = null;
+
+            if (currentQuestion >= questions.length) {
+                showResult();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function showResult() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+
+            document.getElementById('finalScore').textContent = score;
+
+            let message = '';
+            const percentage = score / questions.length * 100;
+            if (percentage === 100) {
+                message = '🏆 완벽해요! 사자성어 마스터!';
+            } else if (percentage >= 80) {
+                message = '👏 훌륭해요! 거의 다 알고 있네요!';
+            } else if (percentage >= 60) {
+                message = '👍 좋아요! 조금만 더 연습해봐요!';
+            } else if (percentage >= 40) {
+                message = '💪 괜찮아요! 다시 도전해봐요!';
+            } else {
+                message = '📚 열심히 복습하고 다시 도전해봐요!';
+            }
+            document.getElementById('resultMessage').textContent = message;
+
+            const wrongList = document.getElementById('wrongList');
+            const wrongItems = document.getElementById('wrongItems');
+
+            if (wrongAnswers.length > 0) {
+                wrongList.style.display = 'block';
+                wrongItems.innerHTML = wrongAnswers.map(w => `
+                    <div class="wrong-item">
+                        <strong>${w.word} (${w.hanja})</strong><br>
+                        ${w.meaning}
+                    </div>
+                `).join('');
+            } else {
+                wrongList.style.display = 'none';
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
